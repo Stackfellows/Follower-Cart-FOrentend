@@ -36,7 +36,7 @@ const BuyNon = ({ service, platform }) => {
       };
 
       const response = await fetch(
-        "http://localhost:5000/followerApi/createOrder",
+        "https://follower-cart-bacend.onrender.com/followerApi/createOrder",
         {
           method: "POST",
           headers: {

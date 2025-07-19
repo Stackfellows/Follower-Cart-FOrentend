@@ -13,7 +13,8 @@ import {
 import axios from "axios"; // Axios import for API calls
 import { Link } from "react-router-dom"; // Import Link for navigation
 
-const Blog = () => {
+// `user` prop add kiya gaya hai
+const Blog = ({ user }) => {
   const [blogPosts, setBlogPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -22,8 +23,9 @@ const Blog = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newPostTitle, setNewPostTitle] = useState("");
   const [newPostContent, setNewPostContent] = useState("");
-  const [newPostAuthor, setNewPostAuthor] = useState("");
-  const [newPostImageUrl, setNewPostImageUrl] = useState("");
+  // Author ab logged-in user (admin) ki ID hogi
+  // const [newPostAuthor, setNewPostAuthor] = useState(""); // Ab iski zaroorat nahi hai directly user._id use karenge
+  const [newPostImageFile, setNewPostImageFile] = useState(null); // File upload ke liye naya state
   const [formLoading, setFormLoading] = useState(false);
   const [formMessage, setFormMessage] = useState(null); // { type: 'success' | 'error', text: '...' }
 
@@ -36,38 +38,38 @@ const Blog = () => {
         "http://localhost:5000/followerApi/blogPosts"
       );
 
-      // Mock data for demonstration if API is not yet implemented or returns empty
-      const mockPosts = [
-        {
-          _id: "60c72b1f9f1b2c001c8e4d1a",
-          title: "Boosting Your Social Presence: A Comprehensive Guide",
-          content:
-            "Learn the best strategies to organically grow your followers, likes, and engagement across various social media platforms. From content creation tips to understanding algorithms, this guide covers it all. This is a longer content to test snippet generation.",
-          author: "Admin",
-          createdAt: "2025-07-15T10:00:00.000Z",
-        },
-        {
-          _id: "60c72b1f9f1b2c001c8e4d1b",
-          title: "The Power of Watch Time: YouTube Algorithm Explained",
-          content:
-            "Discover why watch time is crucial for YouTube success and how you can optimize your videos to keep viewers engaged longer. Practical tips for creators. This post dives deep into the metrics that matter most.",
-          author: "John Doe",
-          createdAt: "2025-07-10T12:30:00.000Z",
-        },
-        {
-          _id: "60c72b1f9f1b2c001c8e4d1c",
-          title: "Instagram Engagement Hacks for Small Businesses",
-          content:
-            "Unlock the secrets to higher engagement on Instagram. This post shares actionable hacks for small businesses to connect with their audience and drive sales. Learn about hashtags, Reels, and Stories.",
-          author: "Jane Smith",
-          createdAt: "2025-07-05T15:45:00.000Z",
-        },
-      ];
-
+      // Backend (profile.js) se direct array aane ki ummeed hai, { posts: [...] } nahi.
+      // Agar backend se empty array ya kuch aur aata hai, to mock data use karein.
       const fetchedData =
-        res.data.posts && res.data.posts.length > 0
-          ? res.data.posts
-          : mockPosts;
+        Array.isArray(res.data) && res.data.length > 0
+          ? res.data
+          : [
+              {
+                _id: "60c72b1f9f1b2c001c8e4d1a",
+                title: "Boosting Your Social Presence: A Comprehensive Guide",
+                content:
+                  "Learn the best strategies to organically grow your followers, likes, and engagement across various social media platforms. From content creation tips to understanding algorithms, this guide covers it all. This is a longer content to test snippet generation.",
+                // `author` field backend se populated object hoga jismein `name` property hogi
+                author: { _id: "adminId1", name: "FollowersCart Admin" },
+                createdAt: "2025-07-15T10:00:00.000Z",
+              },
+              {
+                _id: "60c72b1f9f1b2c001c8e4d1b",
+                title: "The Power of Watch Time: YouTube Algorithm Explained",
+                content:
+                  "Discover why watch time is crucial for YouTube success and how you can optimize your videos to keep viewers engaged longer. Practical tips for creators. This post dives deep into the metrics that matter most.",
+                author: { _id: "adminId2", name: "Usman Ali" },
+                createdAt: "2025-07-10T12:30:00.000Z",
+              },
+              {
+                _id: "60c72b1f9f1b2c001c8e4d1c",
+                title: "Instagram Engagement Hacks for Small Businesses",
+                content:
+                  "Unlock the secrets to higher engagement on Instagram. This post shares actionable hacks for small businesses to connect with their audience and drive sales. Learn about hashtags, Reels, and Stories.",
+                author: { _id: "adminId3", name: "Guest Author" },
+                createdAt: "2025-07-05T15:45:00.000Z",
+              },
+            ];
 
       const fetchedAndFormattedPosts = fetchedData.map((post) => ({
         id: post._id,
@@ -77,7 +79,8 @@ const Blog = () => {
           month: "long",
           day: "numeric",
         }),
-        author: post.author || "Admin",
+        // `post.author.name` ka use karein agar author populated hai, warna default
+        author: post.author && post.author.name ? post.author.name : "Admin",
         snippet:
           post.snippet ||
           (post.content
@@ -104,18 +107,49 @@ const Blog = () => {
     setFormLoading(true);
     setFormMessage(null);
 
+    // Backend API call ke liye token bhejna zaroori hai agar route protected hai
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setFormMessage({
+        type: "error",
+        text: "Authentication token not found. Please log in as an admin.",
+      });
+      setFormLoading(false);
+      return;
+    }
+
+    // Ensure user is an admin to create a post
+    if (!user || user.role !== "admin" || !user._id) {
+      setFormMessage({
+        type: "error",
+        text: "You must be logged in as an admin to create a blog post.",
+      });
+      setFormLoading(false);
+      return;
+    }
+
     try {
-      const postData = {
-        title: newPostTitle,
-        content: newPostContent,
-        author: newPostAuthor || "Admin", // Default to 'Admin' if not provided
-        imageUrl: newPostImageUrl,
+      const formData = new FormData();
+      formData.append("title", newPostTitle);
+      formData.append("content", newPostContent);
+      formData.append("authorId", user._id); // Backend expecting authorId (user's _id)
+      if (newPostImageFile) {
+        formData.append("image", newPostImageFile); // 'image' field name backend ke upload.single('image') se match hona chahiye
+      }
+
+      const config = {
+        headers: {
+          "x-auth-token": token, // Token ko headers mein bhejein
+          "Content-Type": "multipart/form-data", // Important for file uploads
+        },
       };
 
       const res = await axios.post(
         "http://localhost:5000/followerApi/blogPosts",
-        postData
+        formData, // FormData object bhejein
+        config // config ko pass karein
       );
+
       setFormMessage({
         type: "success",
         text: res.data.msg || "Blog post created successfully!",
@@ -124,8 +158,8 @@ const Blog = () => {
       // Clear form fields
       setNewPostTitle("");
       setNewPostContent("");
-      setNewPostAuthor("");
-      setNewPostImageUrl("");
+      // setNewPostAuthor(""); // Ab iski zaroorat nahi hai
+      setNewPostImageFile(null); // Clear selected file
       setShowCreateForm(false); // Hide form after successful submission
 
       // Refresh the blog posts list
@@ -135,6 +169,7 @@ const Blog = () => {
       setFormMessage({
         type: "error",
         text:
+          err.response?.data?.error ||
           err.response?.data?.msg ||
           "Failed to create blog post. Please try again.",
       });
@@ -158,26 +193,30 @@ const Blog = () => {
           </p>
         </div>
 
-        {/* Button to toggle New Blog Post Form */}
-        <div className="mb-8 text-center">
-          <button
-            onClick={() => setShowCreateForm(!showCreateForm)}
-            className="px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold text-lg shadow-md hover:bg-purple-700 transition-colors duration-200 flex items-center justify-center mx-auto"
-          >
-            {showCreateForm ? (
-              <>
-                <XCircle className="h-5 w-5 mr-2" /> Hide Blog Form
-              </>
-            ) : (
-              <>
-                <PlusCircle className="h-5 w-5 mr-2" /> Create New Blog Post
-              </>
-            )}
-          </button>
-        </div>
+        {/* Button to toggle New Blog Post Form - Conditionally Rendered */}
+        {/* Sirf admin users ko dikhayega */}
+        {user && user.role === "admin" && (
+          <div className="mb-8 text-center">
+            <button
+              onClick={() => setShowCreateForm(!showCreateForm)}
+              className="px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold text-lg shadow-md hover:bg-purple-700 transition-colors duration-200 flex items-center justify-center mx-auto"
+            >
+              {showCreateForm ? (
+                <>
+                  <XCircle className="h-5 w-5 mr-2" /> Hide Blog Form
+                </>
+              ) : (
+                <>
+                  <PlusCircle className="h-5 w-5 mr-2" /> Create New Blog Post
+                </>
+              )}
+            </button>
+          </div>
+        )}
 
-        {/* New Blog Post Form */}
-        {showCreateForm && (
+        {/* New Blog Post Form - Conditionally Rendered */}
+        {/* Sirf admin users ko dikhayega aur tab jab showCreateForm true ho */}
+        {user && user.role === "admin" && showCreateForm && (
           <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">
               Create New Blog Post
@@ -230,37 +269,26 @@ const Blog = () => {
                   required
                 ></textarea>
               </div>
+              {/* Image URL field ko file upload se replace karein */}
               <div>
                 <label
-                  htmlFor="newPostAuthor"
+                  htmlFor="newPostImageFile"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
-                  Author (Optional)
+                  Upload Image (Optional)
                 </label>
                 <input
-                  type="text"
-                  id="newPostAuthor"
-                  value={newPostAuthor}
-                  onChange={(e) => setNewPostAuthor(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-200"
-                  placeholder="Enter author name (e.g., Admin)"
+                  type="file"
+                  id="newPostImageFile"
+                  accept="image/*" // Sirf image files accept karein
+                  onChange={(e) => setNewPostImageFile(e.target.files[0])}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-200 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
                 />
-              </div>
-              <div>
-                <label
-                  htmlFor="newPostImageUrl"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Image URL (Optional)
-                </label>
-                <input
-                  type="url"
-                  id="newPostImageUrl"
-                  value={newPostImageUrl}
-                  onChange={(e) => setNewPostImageUrl(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-200"
-                  placeholder="e.g., https://example.com/image.jpg"
-                />
+                {newPostImageFile && (
+                  <p className="mt-2 text-sm text-gray-500">
+                    Selected file: {newPostImageFile.name}
+                  </p>
+                )}
               </div>
               <button
                 type="submit"

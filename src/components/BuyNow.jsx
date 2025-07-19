@@ -60,8 +60,7 @@ const getServicePackages = (currentService, USD_TO_PKR_RATE) => {
         popular: false,
         warranty: "30-day refill",
       },
-    ],
-    // Specific Instagram services (assuming these are distinct from generic "Followers", "Likes", "Comments")
+    ], // Specific Instagram services (assuming these are distinct from generic "Followers", "Likes", "Comments")
     "Instagram Followers": [
       {
         id: 0,
@@ -91,8 +90,7 @@ const getServicePackages = (currentService, USD_TO_PKR_RATE) => {
         popular: true,
         warranty: "Lifetime",
       }, // Updated price
-    ],
-    // YouTube services
+    ], // YouTube services
     "YouTube Watch Time": [
       {
         id: 0,
@@ -112,8 +110,7 @@ const getServicePackages = (currentService, USD_TO_PKR_RATE) => {
         popular: true,
         warranty: "Lifetime",
       }, // Updated price
-    ],
-    // TikTok services
+    ], // TikTok services
     "TikTok Likes": [
       {
         id: 0,
@@ -143,8 +140,7 @@ const getServicePackages = (currentService, USD_TO_PKR_RATE) => {
         popular: true,
         warranty: "Lifetime",
       }, // Updated price
-    ],
-    // Facebook services
+    ], // Facebook services
     "Facebook Page Watch Time": [
       {
         id: 0,
@@ -164,8 +160,7 @@ const getServicePackages = (currentService, USD_TO_PKR_RATE) => {
         popular: true,
         warranty: "Lifetime",
       }, // Updated price
-    ],
-    // Fallback for "Other" or unknown services not explicitly listed
+    ], // Fallback for "Other" or unknown services not explicitly listed
     Other: [
       {
         id: 0,
@@ -176,11 +171,8 @@ const getServicePackages = (currentService, USD_TO_PKR_RATE) => {
         warranty: "None",
       },
     ],
-  };
+  }; // Return the packages for the current service. // If the specific service is not found, default to "Followers" packages. // If "Followers" itself is not found (shouldn't happen with this setup), default to "Other".
 
-  // Return the packages for the current service.
-  // If the specific service is not found, default to "Followers" packages.
-  // If "Followers" itself is not found (shouldn't happen with this setup), default to "Other".
   return (
     allServicePackages[currentService] ||
     allServicePackages["Followers"] ||
@@ -202,12 +194,15 @@ const InputField = React.memo(
   }) => {
     return (
       <div className="space-y-2">
+               {" "}
         <label
           htmlFor={name}
           className="block text-sm font-medium text-gray-700"
         >
-          {label} {isRequired && <span className="text-red-500">*</span>}
+                    {label}{" "}
+          {isRequired && <span className="text-red-500">*</span>}       {" "}
         </label>
+               {" "}
         <input
           type={type}
           id={name}
@@ -219,9 +214,11 @@ const InputField = React.memo(
             error ? "border-red-500" : "border-gray-300"
           }`}
         />
+               {" "}
         {error && (
           <p className="text-red-500 text-sm mt-1 animate-pulse">{error}</p>
         )}
+             {" "}
       </div>
     );
   }
@@ -242,23 +239,20 @@ const BuyNow = ({ user, service = "Followers", platform = "Instagram" }) => {
   const [submissionMessage, setSubmissionMessage] = useState(null);
 
   const navigate = useNavigate();
-  const location = useLocation();
+  const location = useLocation(); // Use useMemo for packages to prevent re-creation on every render
 
-  // Use useMemo for packages to prevent re-creation on every render
   const packages = useMemo(
     () => getServicePackages(service, USD_TO_PKR),
     [service, USD_TO_PKR] // Depend on service and USD_TO_PKR to re-calculate when they change
-  );
+  ); // Effect to reset selectedPackage when 'packages' array changes (i.e., when service changes)
 
-  // Effect to reset selectedPackage when 'packages' array changes (i.e., when service changes)
   useEffect(() => {
     // Ensure selectedPackage is a valid index for the new 'packages' array
     if (selectedPackage >= packages.length) {
       setSelectedPackage(0); // Reset to the first package if current index is out of bounds
     }
-  }, [packages, selectedPackage]);
+  }, [packages, selectedPackage]); // Effect to pre-fill form if reorderData is present in location state OR user prop is available
 
-  // Effect to pre-fill form if reorderData is present in location state OR user prop is available
   useEffect(() => {
     // Prioritize reorderData if available
     if (location.state && location.state.reorderData) {
@@ -297,9 +291,8 @@ const BuyNow = ({ user, service = "Followers", platform = "Instagram" }) => {
         text: "Form pre-filled with your user information.",
       });
     }
-  }, [location.state, user, packages]); // Add user and packages to dependency array
+  }, [location.state, user, packages]); // Add user and packages to dependency array // Function to validate form inputs
 
-  // Function to validate form inputs
   const validateForm = () => {
     const newErrors = {};
     if (!name.trim()) newErrors.name = "Name is required";
@@ -346,7 +339,7 @@ const BuyNow = ({ user, service = "Followers", platform = "Instagram" }) => {
 
     try {
       const res = await axios.post(
-        "http://localhost:5000/followerApi/createOrder",
+        "https://follower-cart-bacend.onrender.com/followerApi/createOrder", // Updated URL
         data,
         { timeout: 15000 }
       );
@@ -354,9 +347,8 @@ const BuyNow = ({ user, service = "Followers", platform = "Instagram" }) => {
       setSubmissionMessage({
         type: "success",
         text: `Order placed successfully! Order ID: ${res.data.id}. Redirecting to payment...`,
-      });
+      }); // --- Navigate to /payment/:orderId after successful order creation ---
 
-      // --- Navigate to /payment/:orderId after successful order creation ---
       setTimeout(() => {
         navigate(`/payment/${res.data.id}`); // Navigate to the /payment route with order ID
       }, 2500); // Give user 2.5 seconds to see success message
@@ -393,16 +385,22 @@ const BuyNow = ({ user, service = "Followers", platform = "Instagram" }) => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 flex justify-center items-center">
+           {" "}
       <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md mx-auto w-full">
+               {" "}
         <div className="text-center mb-6">
+                   {" "}
           <h3 className="text-2xl font-bold text-gray-900 mb-2">
-            Buy {platform} {service}
+                        Buy {platform} {service}         {" "}
           </h3>
+                   {" "}
           <p className="text-gray-600">
-            Choose your package and boost your social presence.
+                        Choose your package and boost your social presence.    
+                 {" "}
           </p>
+                 {" "}
         </div>
-
+               {" "}
         {submissionMessage && (
           <div
             className={`flex items-center justify-center p-4 rounded-lg text-white font-semibold mb-4 ${
@@ -413,16 +411,18 @@ const BuyNow = ({ user, service = "Followers", platform = "Instagram" }) => {
                 : "bg-red-500"
             }`}
           >
+                       {" "}
             {submissionMessage.type === "success" ? (
               <CheckCircle className="h-5 w-5 mr-2" />
             ) : (
               <XCircle className="h-5 w-5 mr-2" />
             )}
-            {submissionMessage.text}
+                        {submissionMessage.text}         {" "}
           </div>
         )}
-
+               {" "}
         <div className="space-y-4 mb-6">
+                   {" "}
           {packages.map((pkg) => (
             <div
               key={pkg.id}
@@ -433,52 +433,74 @@ const BuyNow = ({ user, service = "Followers", platform = "Instagram" }) => {
                   : "border-gray-200 hover:border-purple-300"
               }`}
             >
+                           {" "}
               {pkg.popular && (
                 <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
+                                   {" "}
                   <span className="bg-purple-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
-                    Most Popular
+                                        Most Popular                  {" "}
                   </span>
+                                 {" "}
                 </div>
               )}
-
+                           {" "}
               <div className="flex justify-between items-center">
+                               {" "}
                 <div>
+                                   {" "}
                   <div className="font-semibold text-gray-900">
-                    {pkg.amountDisplay}{" "}
-                    {service.includes("Watch Time") ? "" : service}
+                                        {pkg.amountDisplay}                    {" "}
+                    {service.includes("Watch Time") ? "" : service}             
+                       {" "}
                   </div>
+                                   {" "}
                   {/* Display price per 1K in USD, only if amountValue is a number and > 0 */}
+                                   {" "}
                   {typeof pkg.amountValue === "number" &&
                     pkg.amountValue > 0 && (
                       <div className="text-sm text-gray-500">
-                        ~USD{" "}
-                        {((pkg.priceUSD / pkg.amountValue) * 1000).toFixed(2)}{" "}
-                        per 1K
+                                                ~USD                        {" "}
+                        {((pkg.priceUSD / pkg.amountValue) * 1000).toFixed(2)}  
+                                              per 1K                      {" "}
                       </div>
                     )}
+                                   {" "}
                   {pkg.warranty && (
                     <div className="text-xs text-green-600 mt-1 flex items-center">
-                      <CheckCircle className="h-3 w-3 mr-1" /> {pkg.warranty}{" "}
-                      Warranty
+                                           {" "}
+                      <CheckCircle className="h-3 w-3 mr-1" /> {pkg.warranty}  
+                                          Warranty                    {" "}
                     </div>
                   )}
+                                 {" "}
                 </div>
+                               {" "}
                 <div className="text-right">
-                  {/* Display total price in USD */}
+                                    {/* Display total price in USD */}         
+                         {" "}
                   <div className="text-2xl font-bold text-purple-600">
-                    USD {pkg.priceUSD.toFixed(2)}
+                                        USD {pkg.priceUSD.toFixed(2)}           
+                         {" "}
                   </div>
-                  {/* Optionally display PKR equivalent in smaller text */}
+                                   {" "}
+                  {/* Optionally display PKR equivalent in smaller text */}     
+                             {" "}
                   <div className="text-sm text-gray-500">
-                    (PKR {(pkg.priceUSD * USD_TO_PKR).toFixed(0)})
+                                        (PKR{" "}
+                    {(pkg.priceUSD * USD_TO_PKR).toFixed(0)})                  {" "}
                   </div>
+                                 {" "}
                 </div>
+                             {" "}
               </div>
+                         {" "}
             </div>
           ))}
+                 {" "}
         </div>
-
+               {" "}
         <div className="space-y-4 mb-6">
+                   {" "}
           <InputField
             label="Your Name"
             name="name"
@@ -495,6 +517,7 @@ const BuyNow = ({ user, service = "Followers", platform = "Instagram" }) => {
             isRequired={true}
             error={errors.name} // Pass error directly
           />
+                   {" "}
           <InputField
             label="Your Email"
             name="email"
@@ -512,6 +535,7 @@ const BuyNow = ({ user, service = "Followers", platform = "Instagram" }) => {
             isRequired={true}
             error={errors.email} // Pass error directly
           />
+                   {" "}
           <InputField
             label="Your Phone Number"
             name="phoneNumber"
@@ -529,6 +553,7 @@ const BuyNow = ({ user, service = "Followers", platform = "Instagram" }) => {
             isRequired={true}
             error={errors.phoneNumber} // Pass error directly
           />
+                   {" "}
           <InputField
             label="Post Link (Optional)"
             name="postLink"
@@ -546,6 +571,7 @@ const BuyNow = ({ user, service = "Followers", platform = "Instagram" }) => {
             isRequired={false}
             error={errors.postLink} // Pass error directly
           />
+                   {" "}
           <InputField
             label="Profile Link"
             name="profileLink"
@@ -563,6 +589,7 @@ const BuyNow = ({ user, service = "Followers", platform = "Instagram" }) => {
             isRequired={true}
             error={errors.profileLink} // Pass error directly
           />
+                   {" "}
           <InputField
             label="Social ID (Optional)"
             name="socialId"
@@ -579,40 +606,50 @@ const BuyNow = ({ user, service = "Followers", platform = "Instagram" }) => {
             isRequired={false}
             error={errors.socialId} // Pass error directly
           />
+                 {" "}
         </div>
-
+               {" "}
         <button
           onClick={handlePurchase}
           disabled={isSubmitting}
           className="w-full bg-purple-600 text-white py-4 rounded-xl font-semibold text-lg hover:bg-purple-700 transform hover:scale-105 transition-all duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
         >
+                   {" "}
           {isSubmitting ? (
             <div className="flex items-center space-x-2">
+                           {" "}
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              <span>Processing...</span>
+                            <span>Processing...</span>           {" "}
             </div>
           ) : (
             <>
-              <ShoppingCart className="h-5 w-5 mr-2" />
-              Buy Now - USD {packages[selectedPackage].priceUSD.toFixed(2)}{" "}
-              {/* Display USD price */}
+                            <ShoppingCart className="h-5 w-5 mr-2" />           
+                Buy Now - USD {packages[selectedPackage].priceUSD.toFixed(2)}  
+                          {/* Display USD price */}             {" "}
               <span className="ml-2 text-sm opacity-80">
-                (PKR{" "}
+                                (PKR                {" "}
                 {(packages[selectedPackage].priceUSD * USD_TO_PKR).toFixed(0)})
+                             {" "}
               </span>
+                         {" "}
             </>
           )}
+                 {" "}
         </button>
-
+               {" "}
         <div className="mt-4 text-center text-xs text-gray-500">
+                   {" "}
           <p>
-            ✓ No password required{" "}
+                        ✓ No password required            {" "}
             {packages[selectedPackage]?.warranty &&
               `✓ ${packages[selectedPackage].warranty} guarantee`}{" "}
-            ✓ 24/7 support
+                        ✓ 24/7 support          {" "}
           </p>
+                 {" "}
         </div>
+             {" "}
       </div>
+         {" "}
     </div>
   );
 };

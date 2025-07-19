@@ -29,7 +29,7 @@ const Payments = () => {
     try {
       // Fetch all orders from your backend
       const response = await axios.get(
-        "http://localhost:5000/followerApi/getOrders"
+        "https://follower-cart-bacend.onrender.com/followerApi/getOrders"
       );
       // Filter orders that have payment details or are pending
       const paymentsData = response.data.filter(
@@ -51,7 +51,7 @@ const Payments = () => {
     }
     try {
       await axios.patch(
-        `http://localhost:5000/followerApi/updateOrder/${orderId}`,
+        `https://follower-cart-bacend.onrender.com/followerApi/updateOrder/${orderId}`,
         {
           status: newStatus,
         }

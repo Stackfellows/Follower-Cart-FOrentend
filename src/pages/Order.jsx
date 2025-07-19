@@ -43,7 +43,7 @@ const Order = ({ user }) => {
       setLoading(true);
       // IMPORTANT CHANGE: Call userOrders API with the logged-in user's email
       const response = await axios.get(
-        `http://localhost:5000/followerApi/userOrders/${user.email}`
+        `https://follower-cart-bacend.onrender.com/followerApi/userOrders/${user.email}`
       );
       setOrders(response.data.orders || []);
       setActionMessage(null); // Clear messages on successful fetch

@@ -104,7 +104,7 @@ const AdminDashboard = ({ user }) => {
     setErrorOrders(null);
     try {
       const res = await axios.get(
-        "http://localhost:5000/followerApi/allOrders"
+        "https://follower-cart-bacend.onrender.com/followerApi/allOrders"
       );
       console.log("Raw orders response:", res.data);
 
@@ -289,7 +289,9 @@ const AdminDashboard = ({ user }) => {
     setLoadingUsers(true);
     setErrorUsers(null);
     try {
-      const res = await axios.get("http://localhost:5000/followerApi/alluser"); // Ensure this endpoint is correct
+      const res = await axios.get(
+        "https://follower-cart-bacend.onrender.com/followerApi/alluser"
+      ); // Ensure this endpoint is correct
       console.log("Raw users response:", res.data);
       setUsersData(res.data);
       setTotalUsers(res.data.length); // Update total users stat
@@ -312,7 +314,7 @@ const AdminDashboard = ({ user }) => {
     setErrorPayments(null);
     try {
       const res = await axios.get(
-        "http://localhost:5000/followerApi/allPayments"
+        "https://follower-cart-bacend.onrender.com/followerApi/allPayments"
       );
       console.log("Raw payments response:", res.data);
       // Ensure paymentDate is used for display
@@ -360,7 +362,7 @@ const AdminDashboard = ({ user }) => {
 
       // Make the API call to update the order status on the backend
       const res = await axios.patch(
-        `http://localhost:5000/followerApi/updateOrder/${orderId}`,
+        `https://follower-cart-bacend.onrender.com/followerApi/updateOrder/${orderId}`,
         { status: "Completed" }
       );
       console.log(`Order ${orderId} updated to Completed:`, res.data);
@@ -401,7 +403,7 @@ const AdminDashboard = ({ user }) => {
       );
 
       const res = await axios.patch(
-        `http://localhost:5000/followerApi/updateOrder/${orderId}`,
+        `https://follower-cart-bacend.onrender.com/followerApi/updateOrder/${orderId}`,
         { status: "In Progress" }
       );
       console.log(`Order ${orderId} updated to In Progress:`, res.data);
@@ -443,7 +445,7 @@ const AdminDashboard = ({ user }) => {
 
     try {
       const response = await axios.patch(
-        `http://localhost:5000/followerApi/updateOrder/${orderToCancel.id}`,
+        `https://follower-cart-bacend.onrender.com/followerApi/updateOrder/${orderToCancel.id}`,
         { status: "Cancelled" }
       );
       console.log("Order cancelled:", response.data);
@@ -490,7 +492,7 @@ const AdminDashboard = ({ user }) => {
     try {
       // 1. Update payment status in the database
       const paymentResponse = await axios.patch(
-        `http://localhost:5000/followerApi/updatePayment/${paymentToUpdate._id}`,
+        `https://follower-cart-bacend.onrender.com/followerApi/updatePayment/${paymentToUpdate._id}`,
         { status: newStatus }
       );
       console.log(
@@ -501,7 +503,7 @@ const AdminDashboard = ({ user }) => {
       // 2. If payment is approved, also update the associated order's status to "In Progress"
       if (newStatus === "Approved" && paymentToUpdate.orderId) {
         const orderResponse = await axios.patch(
-          `http://localhost:5000/followerApi/updateOrder/${paymentToUpdate.orderId}`,
+          `https://follower-cart-bacend.onrender.com/followerApi/updateOrder/${paymentToUpdate.orderId}`,
           { status: "In Progress" }
         );
         console.log(

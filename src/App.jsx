@@ -50,11 +50,11 @@ import TikTokViews from "./pages/services/tiktok/TikTokViews";
 
 // CORRECTED IMPORTS:
 // Changed from "./pages/BuyNow" to "./components/BuyNow"
-import BuyNow from "./components/BuyNow"; // This should import the actual BuyNow component from components folder
+import BuyNow from "./components/BuyNow";
+// This should import the actual BuyNow component from components folder
 import PaymentMethodForm from "./pages/PaymentMethodForm"; // This should import the PaymentMethodForm component
 import OrderDetails from "./pages/OrderDetails"; // Corrected: Ensure no extra dot in import path
-
-import OwnerProfile from "./pages/OwnerProfile";
+import ResetPassword from "./components/ResetPassword";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -118,19 +118,15 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login onLogin={handleLogin} />} />
-
             {/* Route for placing new orders or reordering - Pass user prop */}
             <Route path="/buy" element={<BuyNow user={user} />} />
-
             {/* NEW ROUTE: For payment processing after order creation */}
             <Route path="/payment/:orderId" element={<PaymentMethodForm />} />
-
             {/* Route for Order Details - Pass user prop */}
             <Route
               path="/order-details/:orderId"
               element={<OrderDetails user={user} />}
             />
-
             {/* Protected Routes */}
             <Route
               path="/client-dashboard"
@@ -155,7 +151,6 @@ function App() {
                 )
               }
             />
-
             {/* Order page - Pass user prop */}
             <Route path="/order" element={<Order user={user} />} />
             <Route path="/blog" element={<Blog />} />
@@ -163,8 +158,11 @@ function App() {
             <Route path="/refund-policy" element={<RefundPolicy />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/blog" element={<Blog />} />
-            <Route path="/owner-profile" element={<OwnerProfile />} />
-
+            <Route
+              path="/reset-password/:token"
+              element={<ResetPassword />}
+            />{" "}
+            {/* <<< यह रूट पहले से मौजूद है और सही है >>> */}
             {/* Instagram Services - These will likely navigate to /buy with pre-selected service/platform */}
             <Route
               path="/instagram/followers"
@@ -190,7 +188,6 @@ function App() {
               path="/instagram/comments"
               element={<InstagramComments user={user} />}
             />
-
             {/* YouTube Services */}
             <Route
               path="/youtube/subscribers"
@@ -216,7 +213,6 @@ function App() {
               path="/youtube/live-stream"
               element={<YouTubeLiveStream user={user} />}
             />
-
             {/* Facebook Services */}
             <Route
               path="/facebook/followers"
@@ -238,7 +234,6 @@ function App() {
               path="/facebook/page-likes"
               element={<FacebookPageLikes user={user} />}
             />
-
             {/* TikTok Services */}
             <Route
               path="/tiktok/followers"
@@ -246,7 +241,6 @@ function App() {
             />
             <Route path="/tiktok/likes" element={<TikTokLikes user={user} />} />
             <Route path="/tiktok/views" element={<TikTokViews user={user} />} />
-
             {/* Fallback for unknown routes */}
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>

@@ -176,22 +176,13 @@ const Footer = () => {
                   Blog
                 </Link>
               </li>
-              <li>
-                <Link
-                  to="/owner-profile" // Link to the new Owner Profile page
-                  className="text-gray-300 hover:text-purple-400 transition-colors duration-200"
-                  onClick={scrollToTop}
-                >
-                  Owner Profile
-                </Link>
-              </li>
             </ul>
           </div>
         </div>
 
         <div className="border-t border-gray-800 mt-8 pt-8 text-center">
           <p className="text-gray-300">
-            © 2024 FollowerCarts. All rights reserved. Made with ❤️ for social
+            © 2025 FollowerCarts. All rights reserved. Made with ❤️ for social
             media growth.
           </p>
         </div>
